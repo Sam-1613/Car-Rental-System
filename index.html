@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickRent - Car Rental System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="logo">
+        <span class="logo-icon">🚗</span>
+        <span class="logo-text">QuickRent</span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="fleet">Fleet Catalog</button>
+        <button class="nav-btn" data-tab="rentals">Active Rentals <span id="rental-badge" class="badge">0</span></button>
+        <button class="btn btn-primary" id="open-add-car-btn">+ Add Car</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Quick Statistics Banner -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Fleet</div>
+        <div class="stat-value" id="stat-total-cars">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Available Cars</div>
+        <div class="stat-value text-success" id="stat-available-cars">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Currently Rented</div>
+        <div class="stat-value text-warning" id="stat-rented-cars">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value text-primary" id="stat-total-revenue">₹0</div>
+      </div>
+    </section>
+
+    <!-- TAB 1: FLEET VIEW -->
+    <section id="fleet-view" class="tab-view active">
+      <div class="controls-bar">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Search by make, model, or category...">
+        </div>
+        <div class="filter-pills" id="category-filters">
+          <button class="pill active" data-category="all">All</button>
+          <button class="pill" data-category="Hatchback">Hatchback</button>
+          <button class="pill" data-category="Sedan">Sedan</button>
+          <button class="pill" data-category="SUV">SUV</button>
+          <button class="pill" data-category="Electric">Electric</button>
+          <button class="pill" data-category="Luxury">Luxury</button>
+        </div>
+      </div>
+
+      <div class="car-grid" id="car-grid">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 2: ACTIVE RENTALS VIEW -->
+    <section id="rentals-view" class="tab-view">
+      <div class="section-header">
+        <h2>Active Rentals</h2>
+        <p class="subtitle">Manage ongoing customer rentals and handle returns.</p>
+      </div>
+      <div class="table-container">
+        <table class="rentals-table">
+          <thead>
+            <tr>
+              <th>Rental ID</th>
+              <th>Car</th>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Duration</th>
+              <th>Total Paid</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="rentals-table-body">
+            <!-- Rendered via JavaScript -->
+          </tbody>
+        </table>
+        <div id="no-rentals-msg" class="empty-state">
+          <p>No active rentals at the moment.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rent Car Modal -->
+  <div class="modal" id="rent-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="rent-car-title">Rent Vehicle</h3>
+        <button class="close-btn" data-close="rent-modal">&times;</button>
+      </div>
+      <form id="rent-form">
+        <input type="hidden" id="rent-car-id">
+        <div class="form-group">
+          <label for="customer-name">Customer Name</label>
+          <input type="text" id="customer-name" required placeholder="e.g. John Doe">
+        </div>
+        <div class="form-group">
+          <label for="customer-phone">Phone / Email</label>
+          <input type="text" id="customer-phone" required placeholder="e.g. +91 98765 43210 or customer@email.com">
+        </div>
+        <div class="form-group">
+          <label for="rental-days">Rental Duration (Days)</label>
+          <input type="number" id="rental-days" min="1" max="90" value="3" required>
+        </div>
+        <div class="cost-summary">
+          <div class="summary-row">
+            <span>Daily Rate:</span>
+            <span id="modal-daily-rate">₹0</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total Cost:</span>
+            <span id="modal-total-cost">₹0</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close="rent-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Car Modal -->
+  <div class="modal" id="add-car-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Vehicle to Fleet</h3>
+        <button class="close-btn" data-close="add-car-modal">&times;</button>
+      </div>
+      <form id="add-car-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="car-make">Make / Brand</label>
+            <input type="text" id="car-make" required placeholder="e.g. Maruti Suzuki, Mahindra, Tata">
+          </div>
+          <div class="form-group">
+            <label for="car-model">Model</label>
+            <input type="text" id="car-model" required placeholder="e.g. Swift, Thar, Creta">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="car-category">Category</label>
+            <select id="car-category" required>
+              <option value="Hatchback">Hatchback</option>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Electric">Electric</option>
+              <option value="Luxury">Luxury</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="car-price">Price Per Day (₹)</label>
+            <input type="number" id="car-price" min="500" max="100000" required placeholder="e.g. 2500">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="car-transmission">Transmission</label>
+            <select id="car-transmission">
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="car-seats">Seats</label>
+            <input type="number" id="car-seats" min="2" max="9" value="5" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="car-image">Image URL (Optional)</label>
+          <input type="url" id="car-image" placeholder="https://... (Leave empty for default)">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close="add-car-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Vehicle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
